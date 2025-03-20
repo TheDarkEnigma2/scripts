@@ -1,5 +1,4 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-# Basic "Hello, world!" program in Bash.
-
+# Basic "Hello, world!" program in POSIX shell
 echo "Hello, world!"

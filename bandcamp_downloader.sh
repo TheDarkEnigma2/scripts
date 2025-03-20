@@ -10,7 +10,8 @@ set -euo pipefail
 if [[ -n "${1:-}" ]]; then
   url="$1"
 else
-  echo "Please enter Bandcamp URL."; exit 1
+  echo "Please enter Bandcamp URL."
+  exit 1
 fi
 
 # Download path
@@ -21,26 +22,27 @@ else
 fi
 
 # Create download list file. Remove when exit.
-downloadFile="$(mktemp)"; trap 'rm -f $downloadFile' EXIT
+dwnldList="$(mktemp)"
+trap 'rm -f $dwnldList' EXIT
 
 # Extract song URL and title into download list file
 curl -sL "$url" \
   | grep -Po "(?<=data-tralbum=\").*?(?=\")" \
   | sed 's/&quot;/\"/g' \
   | jq -r '.trackinfo[] | [(.file."mp3-128"),(.title)] | @tsv' \
-  > "$downloadFile"
+  > "$dwnldList"
 
 # Separate URL and title lists from download file and put each into arrays 
-readarray -t songurl < <(cut -f1 "$downloadFile")
-readarray -t songtitle < <(cut -f2- "$downloadFile")
+readarray -t songUrl < <(cut -f1 "$dwnldList")
+readarray -t songTitle < <(cut -f2- "$dwnldList")
 
 echo "Downloading songs..."
 
 # Download songs
-for i in "${!songurl[@]}"; do
-  curl -s "${songurl[i]}" -o \
-    "$path/$(printf "%02d" $((i + 1))) $(echo "${songtitle[i]}" | tr '<>:"/\\|?*\000' '_').mp3"
-  echo "$((i + 1)) \"${songtitle[i]}\" has been downloaded..."
+for i in "${!songUrl[@]}"; do
+  curl -s "${songUrl[i]}" -o \
+    "$path/$(printf "%02d" $((i + 1))) $(echo "${songTitle[i]}" | tr '<>:"/\\|?*\000' '_').mp3"
+  echo "$((i + 1)) \"${songTitle[i]}\" has been downloaded..."
 done
 
 # Download complete
