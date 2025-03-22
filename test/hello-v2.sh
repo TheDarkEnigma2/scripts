@@ -8,12 +8,15 @@ ask() {
 }
 
 # Hello function.
-hello () {
+hello() {
   echo "Hello, $1!"
 }
 
 # If name is given as arguement, greet user.
-[ -n "$1" ] && hello "$1" && exit
+if [ -n "$1" ]; then
+  hello "$1"
+  exit
+fi
 
 # If script run without arguement, ask user for their name.
 ask

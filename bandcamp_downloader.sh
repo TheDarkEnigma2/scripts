@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 # Downloads music from Bandcamp page.
-# Required dependencies: bash, curl, jq
+# Required dependencies: bash, curl
 
 # Enable strict mode
 set -euo pipefail
+IFS=$'\n\t'
 
 # Get Bandcamp URL
 if [[ -n "${1:-}" ]]; then
@@ -14,35 +15,58 @@ else
   exit 1
 fi
 
-# Download path
+# Download directory
 if [[ -n "${2:-}" ]]; then
-  path="$2"
+  downldDir="$2"
 else
-  path="."
+  downldDir="."
 fi
 
-# Create download list file. Remove when exit.
-dwnldList="$(mktemp)"
-trap 'rm -f $dwnldList' EXIT
+# Create temporary directory for download files. Remove when exit.
+tempDir="$(mktemp -d)"
+trap 'rm -rf $tempDir' EXIT
 
-# Extract song URL and title into download list file
+# Variables for temporary files
+json="$tempDir"/json
+songTitleFile="$tempDir"/song_title
+songUrlFile="$tempDir"/song_url
+
+# Extract JSON from HTML album page
 curl -sL "$url" \
-  | grep -Po "(?<=data-tralbum=\").*?(?=\")" \
-  | sed 's/&quot;/\"/g' \
-  | jq -r '.trackinfo[] | [(.file."mp3-128"),(.title)] | @tsv' \
-  > "$dwnldList"
+  | grep -Po "(?<=trackinfo&quot;:\[).*?(?=\])" \
+  > "$json"
 
-# Separate URL and title lists from download file and put each into arrays 
-readarray -t songUrl < <(cut -f1 "$dwnldList")
-readarray -t songTitle < <(cut -f2- "$dwnldList")
+# Extract song titles from JSON and put into file
+grep -Po "(?<=title&quot;:&quot;).*?(?=&quot;)" \
+  "$json" \
+  > "$songTitleFile"
+
+# Extract download URLs from JSON and put into another file
+grep -Po "https://t4.bcbits.com/stream/[0-9a-z]{32}/mp3-128/[0-9]+\?p=0&amp;ts=[0-9]{10}&amp;t=[0-9a-z]{40}&amp;token=[0-9]{10}_[0-9a-z]{40}" \
+  "$json" \
+  > "$songUrlFile"
+
+# Extract title and URLs from respective files and put each into array
+readarray -t songTitleArray < "$songTitleFile"
+readarray -t songUrlArray < "$songUrlFile"
 
 echo "Downloading songs..."
 
-# Download songs
-for i in "${!songUrl[@]}"; do
-  curl -s "${songUrl[i]}" -o \
-    "$path/$(printf "%02d" $((i + 1))) $(echo "${songTitle[i]}" | tr '<>:"/\\|?*\000' '_').mp3"
-  echo "$((i + 1)) \"${songTitle[i]}\" has been downloaded..."
+# Download songs from list
+for i in "${!songTitleArray[@]}"; do
+
+  # Filename format for MP3 song files
+  filename="$(printf "%02d" $((i + 1))) $(echo "${songTitleArray[i]}" | tr '<>:"/\\|?*\000' '_').mp3"
+
+  # Check if file already exists, don't download if it does.
+  if [[ -f "$downldDir"/"$filename" ]]; then
+    echo "$((i + 1)) \"${songTitleArray[i]}\" already exists."
+  else
+    curl -s "${songUrlArray[i]}" -o "$tempDir/$filename.part"
+    mv "$tempDir/$filename.part" "$downldDir/$filename"
+    echo "$((i + 1)) \"${songTitleArray[i]}\" has been downloaded..."
+  fi
+
 done
 
 # Download complete
