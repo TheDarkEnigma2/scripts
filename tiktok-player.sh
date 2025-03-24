@@ -6,7 +6,7 @@
 set -euo pipefail
 
 # Regex
-regex=".*\.\(mp4\|mov\)$"
+regex=".*\.\(mp4\|mov\|webm\)$"
 
 # Scan function
 scan(){
@@ -15,4 +15,6 @@ scan(){
 }
 
 # Play video
-mpv --fs --loop=inf "$(scan "${1:-.}")"
+while true; do
+  mpv --fs --loop=inf "$(scan "${1:-.}")" > /dev/null 2>&1
+done
