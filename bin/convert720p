@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+ffmpeg -i "$1" -c:v h264 -c:a aac -r 30 -s hd720 -b:v 1M -b:a 96k -ar 44100 "${1} (720p).mp4"

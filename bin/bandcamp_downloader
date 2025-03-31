@@ -2,6 +2,9 @@
 
 # Downloads music from Bandcamp page.
 # Required dependencies: bash, curl
+#
+# Might be too dependent on GNU's vesion of grep and sed.
+# Haven't test this out on other systems.
 
 # Enable strict mode
 set -euo pipefail
@@ -70,4 +73,5 @@ for i in "${!songTitleArray[@]}"; do
 done
 
 # Download complete
-echo "Done!" 
+echo
+echo "$((i + 1)) song(s) downloaded. Done!" 

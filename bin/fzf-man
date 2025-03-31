@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+man "$(compgen -c | fzf --preview 'man {}')"

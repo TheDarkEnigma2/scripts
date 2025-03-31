@@ -1,0 +1,7 @@
+bandcamp_downloader.sh
+convert720p.sh
+fzf-man.sh
+randomsong.sh
+tiktok-player.sh
+userlist.sh
+userlist_color.sh

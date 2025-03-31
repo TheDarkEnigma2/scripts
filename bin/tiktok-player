@@ -5,6 +5,9 @@
 # Enable strict mode
 set -euo pipefail
 
+# Exit on SIGINT
+trap 'exit' SIGINT
+
 # Regex
 regex=".*\.\(mp4\|mov\|webm\)$"
 
@@ -16,5 +19,5 @@ scan(){
 
 # Play video
 while true; do
-  mpv --fs --loop=inf "$(scan "${1:-.}")" > /dev/null 2>&1
+  mpv --fs --loop-playlist=inf "$(scan "${1:-.}")" > /dev/null 2>&1
 done
