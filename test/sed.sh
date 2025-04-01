@@ -1,9 +1,6 @@
 #!/usr/bin/env sh
 
-if [ -z "$1" ]; then
-  echo "Usage: $0 <some_file>, or <command> | $0"
-  exit 255
-fi
+[ -z "$1" ] && echo "Usage: $0 <file>, or <cmd> | $0" && exit 255
 
 file="$1"
 
