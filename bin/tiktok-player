@@ -5,19 +5,16 @@
 # Enable strict mode
 set -euo pipefail
 
-# Exit on SIGINT
-trap 'exit' SIGINT
-
 # Regex
 regex=".*\.\(mp4\|mov\|webm\)$"
 
 # Scan function
 scan(){
   find "$1" -type f -iregex "$regex" \
-  | fzf --preview 'ffmpeg -i {} -ss 00:00:01.00 -vframes 1 -f image2 - 2> /dev/null | kitty icat --clear --transfer-mode=memory --stdin=yes --place=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0'
+  | fzf --preview 'ffmpeg -i {} -ss 00:00:00.00 -vframes 1 -f image2 - 2> /dev/null | kitty icat --clear --transfer-mode=memory --place=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0'
 }
 
 # Play video
 while true; do
-  mpv --fs --loop-playlist=inf "$(scan "${1:-.}")" > /dev/null 2>&1
+  mpv --fs --loop-playlist=inf --volume="${2:-50}" "$(scan "${1:-.}")" > /dev/null 2>&1
 done
