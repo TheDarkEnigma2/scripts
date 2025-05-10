@@ -7,14 +7,14 @@
 # Haven't test this out on other systems.
 
 # Enable strict mode
-set -euo pipefail
-IFS=$'\n\t'
+# set -euo pipefail
+# IFS=$'\n\t'
 
 # Get Bandcamp URL
 if [[ -n "${1:-}" ]]; then
   url="$1"
 else
-  echo "Please enter Bandcamp URL."
+  echo "Please enter Bandcamp URL." >&2
   exit 1
 fi
 
@@ -34,13 +34,14 @@ json="$tempDir"/json
 songTitleFile="$tempDir"/song_title
 songUrlFile="$tempDir"/song_url
 
-# Extract JSON from HTML album page
+# Extract JSON from HTML album page. Throw error if not valid Bandcamp URL.
 
 echo "Downloading album data..."
 
 curl -sL "$url" \
   | grep -Po "(?<=trackinfo&quot;:\[).*?(?=\])" \
-  > "$json"
+  > "$json" \
+  || { echo "Error: Invalid URL!" >&2 && exit 2; }
 
 # Extract song titles from JSON and put into file
 grep -Po "(?<=title&quot;:&quot;).*?(?=&quot;)" \

@@ -8,24 +8,12 @@ set -euo pipefail
 # Regex
 regex=".*\.\(mp4\|mov\|webm\)$"
 
-# Path
-path="${1:-.}"
-
 # Volume
 vol="${2:-50}"
 
-# Optional parameters
-while getopts ":m" opt; do
-  case "$opt" in
-  esac
-done
-
-# Search for songs in directory and pipe to fzf.
-# Show thumbnail preview of video and play in mpv.
-
-# Search for video files in specified path.
-find "$path" -type f -iregex "$regex" \
+# Search for songs in directory and pipe to fzf
+# Show thumbnail preview of video and play in mpv
+find "$1" -type f -iregex "$regex" \
   | fzf \
-    --delimiter / --with-nth -1 \
     --preview 'ffmpeg -i {} -ss 00:00:00.00 -vframes 1 -f image2 - 2> /dev/null | kitty icat --clear --transfer-mode=memory --place=${FZF_PREVIEW_COLUMNS}x${FZF_PREVIEW_LINES}@0x0' \
     --bind "enter:execute:mpv --fs --loop-playlist=inf --volume=$vol {} > /dev/null"

@@ -1,10 +1,11 @@
-#!/usr/bin/env bash
+#!/usr/bin/env sh
 
-# This script prints information about current month
+# Set year variable
+year="$(date +%Y)"
 
-# Function which checks if current year is a leap year.
+# Function for checking if current year is a leap year.
 leap() {
-  if [ "$(($1 % 400))" -eq "0" ] || { [ "$(($1 % 4))" -eq "0" ] && [ "$(($1 % 100))" -ne "0" ]; }; then
+  if [ $(("$year" % 400)) -eq 0 ] || { [ $(("$year" % 4)) -eq 0 ] && [ $(("$year" % 100)) -ne 0 ]; }; then
     true
   else
     false
@@ -14,18 +15,26 @@ leap() {
 # Check month
 month="$(date +%B)"
 
-case $month in
+# String function
+string() {
+  echo "The current month is $1 in the year $year, which has $2 days."
+}
+
+# Print out current month and the number of days in that month.
+case "$month" in
   January|March|May|July|August|October|December)
-    echo "The current month is $month, which has 31 days."
+    string "$month" 31
   ;;
   April|June|September|November)
-    echo "The current month is $month, which has 30 days."
+    string "$month" 30
   ;;
   February)
-    if leap "$(date +%Y)"; then
-      echo "The current month is $month, which has 29 days this year as it's currently a leap year."
+    if leap; then
+      string "$month" 29
+      echo "It is currently a leap year."
     else
-      echo "The current month is $month, which has 28 days this year as it's currently a common year."
+      string "$month" 28
+      echo "It is currently a common year."
     fi
   ;;
 esac

@@ -14,16 +14,8 @@ path="${1:-.}"
 # Volume
 vol="${2:-50}"
 
-# Optional parameters
-while getopts ":m" opt; do
-  case "$opt" in
-  esac
-done
-
-# Search for songs in directory and pipe to fzf.
-# Show thumbnail preview of video and play in mpv.
-
-# Search for video files in specified path.
+# Search for songs in directory and pipe to fzf
+# Show thumbnail preview of video and play in mpv
 find "$path" -type f -iregex "$regex" \
   | fzf \
     --delimiter / --with-nth -1 \
