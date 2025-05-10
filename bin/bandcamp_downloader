@@ -54,6 +54,11 @@ readarray -t songTitleArray < "$songTitleFile"
 readarray -t songUrlArray < "$songUrlFile"
 
 echo "Downloading songs..."
+echo
+
+# Start counters
+counterTotal=0
+counterDwnld=0
 
 # Download songs from list
 for i in "${!songTitleArray[@]}"; do
@@ -64,14 +69,20 @@ for i in "${!songTitleArray[@]}"; do
   # Check if file already exists, don't download if it does.
   if [[ -f "$downldDir"/"$filename" ]]; then
     echo "$((i + 1)) \"${songTitleArray[i]}\" already exists."
+
+  # If song file doesn't exist, download the song.
   else
     curl -s "${songUrlArray[i]}" -o "$tempDir/$filename.part"
     mv "$tempDir/$filename.part" "$downldDir/$filename"
+    ((++counterDwnld))
     echo "$((i + 1)) \"${songTitleArray[i]}\" has been downloaded..."
   fi
+
+  # Increment counter
+  ((++counterTotal))
 
 done
 
 # Download complete
 echo
-echo "$((i + 1)) song(s) downloaded. Done!" 
+echo "$counterDwnld out of $counterTotal song(s) downloaded. Done!" 
